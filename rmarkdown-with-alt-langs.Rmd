@@ -18,7 +18,6 @@ The original reason for working through this was to enable [SAS](https://www.sas
 
 For a full description of how this is accomplished and stitched together, refer to my [blog post](https://www.calex.org/blog/r-markdown-syntax-highlighting/).
 
-
 ## Requirements
 The following R packages are required for the proposed solution.
 
