@@ -1,0 +1,158 @@
+---
+title: "R Markdown with Alternate Languages"
+author: "Curtis Alexander"
+output:
+  html_document:
+    include:
+      in_header: header.html
+    mathjax: null
+params:
+  hilang:
+    - sas
+    - crystal
+---
+
+The purpose of this document is to demonstrate that an R Markdown document can display syntax highlighting for languages that are not supported natively by R Markdown.  Highlighting is actually supported by [pandoc](https://pandoc.org/) and the [skylighting](https://hackage.haskell.org/package/skylighting) Haskell library.  A full list of languages supported by pandoc can be found [here](https://github.com/jgm/skylighting/tree/master/xml).
+
+The original reason for working through this was to enable [SAS](https://www.sas.com) syntax highlighting within an R Markdown html document.
+
+For a full description of how this is accomplished and stitched together, refer to my [blog post](https://www.calex.org/blog/r-markdown-syntax-highlighting/).
+
+
+## Requirements
+The following R packages are required for the proposed solution.
+
+* [stringr](https://cran.r-project.org/web/packages/stringr/index.html)
+* [htmltools](https://cran.r-project.org/web/packages/htmltools/)
+
+In addition, one will need access to the internet as the solution makes use of `<script>` tags to read in Javascript libraries from a [CDN](https://www.cloudflare.com/cdn/).
+
+## Languages 
+
+### [SAS](https://www.sas.com)
+Below is an example of highlighting SAS code.  The code was taken from the [CodeMirror](https://codemirror.net/mode/sas/index.html) example page.
+
+```{r, child="_hilang_setup.Rmd"}
+```
+
+```{r, eval=FALSE, hilang="sas"}
+libname foo "/tmp/foobar";
+%let count=1;
+
+/* Multi line
+Comment
+*/
+data _null_;
+    x=ranuni();
+    * single comment;
+    x2=x**2;
+    sx=sqrt(x);
+    if x=x2 then put "x must be 1";
+    else do;
+        put x=;
+    end;
+run;
+
+/* embedded comment
+* comment;
+*/
+
+proc glm data=sashelp.class;
+    class sex;
+    model weight = height sex;
+run;
+
+proc sql;
+    select count(*)
+    from sashelp.class;
+
+    create table foo as
+    select * from sashelp.class;
+
+    select *
+    from foo;
+quit;
+```
+
+<br/><br/>
+
+### [Crystal](https://crystal-lang.org/)
+Below is an example of highlighting Crystal code.  The code was taken from the [CodeMirror](https://codemirror.net/mode/crystal/index.html) example page.
+
+```{r, eval=FALSE, hilang="crystal"}
+# Features of Crystal
+# - Ruby-inspired syntax.
+# - Statically type-checked but without having to specify the type of variables or method arguments.
+# - Be able to call C code by writing bindings to it in Crystal.
+# - Have compile-time evaluation and generation of code, to avoid boilerplate code.
+# - Compile to efficient native code.
+
+# A very basic HTTP server
+require "http/server"
+
+server = HTTP::Server.new(8080) do |request|
+  HTTP::Response.ok "text/plain", "Hello world, got #{request.path}!"
+end
+
+puts "Listening on http://0.0.0.0:8080"
+server.listen
+
+module Foo
+  abstract def abstract_method : String
+
+  @[AlwaysInline]
+  def with_foofoo
+    with Foo.new(self) yield
+  end
+
+  struct Foo
+    def initialize(@foo : ::Foo)
+    end
+
+    def hello_world
+      @foo.abstract_method
+    end
+  end
+end
+
+class Bar
+  include Foo
+
+  @@foobar = 12345
+
+  def initialize(@bar : Int32)
+  end
+
+  macro alias_method(name, method)
+    def {{ name }}(*args)
+      {{ method }}(*args)
+    end
+  end
+
+  def a_method
+    "Hello, World"
+  end
+
+  alias_method abstract_method, a_method
+
+  def show_instance_vars : Nil
+    {% for var in @type.instance_vars %}
+      puts "@{{ var }} = #{ @{{ var }} }"
+    {% end %}
+  end
+end
+
+class Baz < Bar; end
+
+lib LibC
+  fun c_puts = "puts"(str : Char*) : Int
+end
+
+baz = Baz.new(100)
+baz.show_instance_vars
+baz.with_foofoo do
+  LibC.c_puts hello_world
+end
+```
+
+<br/><br/>
